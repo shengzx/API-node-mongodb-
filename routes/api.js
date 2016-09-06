@@ -1,21 +1,68 @@
 var express = require('express');
 var router = express.Router();
-router.get('/:Id/:Name', function (req, res,next) {
-  res.send('Id是：'+JSON.stringify(req.params));
+var formidable = require('formidable'),
+  fs = require('fs'),
+  TITLE = '上传',
+  AVATAR_UPLOAD_FOLDER = '/images/'
+//路由参数请求，参数不可变
+router.get('/:Id/:Name', function (req, res, next) {
+  res.send('Id是：' + JSON.stringify(req.params));
 });
-
+//带参请求，参数是可变的
+router.get('/', function (req, res, next) {
+  res.send('Id是：' + JSON.stringify(req.query));
+});
 // 网站首页接受 POST 请求
-router.post('/', function (req, res,next) {
-  res.send('Got a POST request');
+router.post('/', function (req, res, next) {
+  debugger;
+  res.send(JSON.stringify(req.body));
 });
-
+router.post('/file', function (req, res, next) {
+  console.log("进入上传接口")
+  var form = new formidable.IncomingForm();   //创建上传表单
+  form.encoding = 'utf-8';		//设置编辑
+  form.uploadDir = 'public' + AVATAR_UPLOAD_FOLDER;	 //设置上传目录
+  form.keepExtensions = true;	 //保留后缀
+  form.maxFieldsSize = 2 * 1024 * 1024;   //文件
+  form.parse(req, function(err, fields, files) {
+    if (err) {
+      res.send(err);
+      return;		
+    }    
+    var extName = '';  //后缀名
+    switch (files.f.type) {
+      case 'image/pjpeg':
+        extName = 'jpg';
+        break;
+      case 'image/jpeg':
+        extName = 'jpg';
+        break;		 
+      case 'image/png':
+        extName = 'png';
+        break;
+      case 'image/x-png':
+        extName = 'png';
+        break;		 
+    }
+    if(extName.length == 0){
+        res.send("只支持图片格式");
+        return;				   
+    }
+    var f = Math.random() + '.' + extName;
+    var newPath = form.uploadDir + f;
+    fs.renameSync(files.f.path, newPath);  //重命名
+  });
+res.send("上传成功！");
+next(err)
+});
 // /user 节点接受 PUT 请求
-router.put('/', function (req, res,next) {
+router.put('/', function (req, res, next) {
   res.send('Got a PUT request at /user');
+  
 });
 
 // /user 节点接受 DELETE 请求
-router.delete('/', function (req, res,next) {
+router.delete('/', function (req, res, next) {
   res.send('Got a DELETE request at /user');
 });
 module.exports = router;

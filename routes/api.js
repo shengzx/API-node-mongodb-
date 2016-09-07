@@ -18,17 +18,16 @@ router.post('/', function (req, res, next) {
   res.send(JSON.stringify(req.body));
 });
 router.post('/file', function (req, res, next) {
-  console.log("进入上传接口")
   var form = new formidable.IncomingForm();   //创建上传表单
   form.encoding = 'utf-8';		//设置编辑
   form.uploadDir = 'public' + AVATAR_UPLOAD_FOLDER;	 //设置上传目录
   form.keepExtensions = true;	 //保留后缀
   form.maxFieldsSize = 2 * 1024 * 1024;   //文件
-  form.parse(req, function(err, fields, files) {
+  form.parse(req, function (err, fields, files) {
     if (err) {
-      res.send(err);
-      return;		
-    }    
+      res.send(500, err);
+      return;
+    }
     var extName = '';  //后缀名
     switch (files.f.type) {
       case 'image/pjpeg':
@@ -36,29 +35,32 @@ router.post('/file', function (req, res, next) {
         break;
       case 'image/jpeg':
         extName = 'jpg';
-        break;		 
+        break;
       case 'image/png':
         extName = 'png';
         break;
       case 'image/x-png':
         extName = 'png';
-        break;		 
+        break;
     }
-    if(extName.length == 0){
-        res.send("只支持图片格式");
-        return;				   
+    if (extName.length == 0) {
+      fs.unlink(files.f.path, function () {
+        res.send(500, "只支持图片格式");
+      })
+      //删除已上传的文件
+    } else {
+      var f = Math.random() + '.' + extName;
+      var newPath = form.uploadDir + f;
+      fs.renameSync(files.f.path, newPath);
+       res.send(200,{msg:"上传成功！"});
     }
-    var f = Math.random() + '.' + extName;
-    var newPath = form.uploadDir + f;
-    fs.renameSync(files.f.path, newPath);  //重命名
   });
-res.send("上传成功！");
-next(err)
+  next();
 });
 // /user 节点接受 PUT 请求
 router.put('/', function (req, res, next) {
   res.send('Got a PUT request at /user');
-  
+
 });
 
 // /user 节点接受 DELETE 请求

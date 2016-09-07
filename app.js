@@ -8,6 +8,7 @@ var domain = require('domain');
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var api = require('./routes/api');
+var methodOverride = require('method-override');
 var app = express();
 
 
@@ -21,10 +22,24 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', routes);
 app.use('/users', users);
 app.use('/api', api);
-
+function logErrors(err, req, res, next) {
+  console.error(err.stack);
+  next(err);
+}
+function clientErrorHandler(err, req, res, next) {
+  if (req.xhr) {
+    res.status(500).send({ error: 'Something blew up!' });
+  } else {
+    next(err);
+  }
+}
 function errorHandler(err, req, res, next) {
   res.status(500);
-  res.send('error', { error: err });
+  res.render('error', { error: err });
 }
+app.use(bodyParser);
+app.use(methodOverride);
+app.use(logErrors);
+app.use(clientErrorHandler);
 app.use(errorHandler);
 module.exports = app;

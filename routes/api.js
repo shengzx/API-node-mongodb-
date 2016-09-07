@@ -57,7 +57,7 @@ router.post('/file', function (req, res, next) {
       }
 
     } catch (err) {
-       res.send(500,{err:err});
+       res.send(500,{err:"操作错误"});
     }
   });
   next();

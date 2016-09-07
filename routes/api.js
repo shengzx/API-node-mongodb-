@@ -24,35 +24,40 @@ router.post('/file', function (req, res, next) {
   form.keepExtensions = true;	 //保留后缀
   form.maxFieldsSize = 2 * 1024 * 1024;   //文件
   form.parse(req, function (err, fields, files) {
-    if (err) {
-      res.send(500, err);
-      return;
-    }
-    var extName = '';  //后缀名
-    switch (files.f.type) {
-      case 'image/pjpeg':
-        extName = 'jpg';
-        break;
-      case 'image/jpeg':
-        extName = 'jpg';
-        break;
-      case 'image/png':
-        extName = 'png';
-        break;
-      case 'image/x-png':
-        extName = 'png';
-        break;
-    }
-    if (extName.length == 0) {
-      fs.unlink(files.f.path, function () {
-        res.send(500, "只支持图片格式");
-      })
-      //删除已上传的文件
-    } else {
-      var f = Math.random() + '.' + extName;
-      var newPath = form.uploadDir + f;
-      fs.renameSync(files.f.path, newPath);
-       res.send(200,{msg:"上传成功！"});
+    try {
+      if (err) {
+        res.send(500, err);
+        return;
+      }
+      var extName = '';  //后缀名
+      switch (files.f.type) {
+        case 'image/pjpeg':
+          extName = 'jpg';
+          break;
+        case 'image/jpeg':
+          extName = 'jpg';
+          break;
+        case 'image/png':
+          extName = 'png';
+          break;
+        case 'image/x-png':
+          extName = 'png';
+          break;
+      }
+      if (extName.length == 0) {
+        fs.unlink(files.f.path, function () {
+          res.send(500, "只支持图片格式");
+        })
+        //删除已上传的文件
+      } else {
+        var f = Math.random() + '.' + extName;
+        var newPath = form.uploadDir + f;
+        fs.renameSync(files.f.path, newPath);
+        res.send(200, { msg: "上传成功！" });
+      }
+
+    } catch (err) {
+       res.send(500,{err:err});
     }
   });
   next();

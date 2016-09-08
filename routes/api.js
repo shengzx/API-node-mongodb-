@@ -1,4 +1,5 @@
 var express = require('express');
+var mongodb = require('../mongodb/mongodbSercice.js');
 var router = express.Router();
 var formidable = require('formidable'),
   fs = require('fs'),
@@ -14,8 +15,15 @@ router.get('/', function (req, res, next) {
 });
 // 网站首页接受 POST 请求
 router.post('/', function (req, res, next) {
-  debugger;
-  res.send(JSON.stringify(req.body));
+  try {
+    mongodb.userModel.find(function (err, user) {
+      mongodb.headPortraitModel.find(function (err, headPortrait) {
+        res.send({ formbody: JSON.stringify(req.body), userinfo: user, headPortrait: headPortrait });
+      });
+    });
+  } catch (err) {
+    res.send("链接错误！");
+  }
 });
 router.post('/file', function (req, res, next) {
   var form = new formidable.IncomingForm();   //创建上传表单
@@ -57,7 +65,7 @@ router.post('/file', function (req, res, next) {
       }
 
     } catch (err) {
-       res.send(500,{err:"操作错误"});
+      res.send(500, { err: "操作错误" });
     }
   });
   next();

@@ -1,27 +1,26 @@
 var mongoose = require('mongoose');
-var db = mongoose.createConnection('mongodb://localhost:27017/user');
-db.on('error', function (error) {
-    return error;
-});
+var db = mongoose.connect('mongodb://localhost:27017/yellowpage');
 //数据表模型
-var userSchema = new mongoose.Schema({
-    userName: string,
-    userSex: string,
-    userEmail: string,
-    headPortrait: string,
-    userType: string,
-    userRole: string,
-    userKey: string,
-    userOpenKey: string,
-    userToken: string,
-    userLogin: string,
-    userPassWord: string,
-    userphone: string
+var Schema = mongoose.Schema;
+var user=function(){};
+var userSchema = new Schema({
+    userName: String,
+    userSex: String,
+    userEmail: String,
+    headPortrait: String,
+    userType: String,
+    userRole: String,
+    userKey: String,
+    userOpenKey: String,
+    userToken: String,
+    userLogin: String,
+    userPassWord: String,
+    userphone: String
 });
-
-userSchema.methods.finduserLogin = function (userLogin, userPassWord, fun) {
-    return this.model('user').find({ userLogin: userLogin, userPassWord: userPassWord }, fun);
-};
-var userModel = db.model('user', userSchema);
-
-var userEntity = new userModel({});
+var headPortraitSchema = new Schema({
+    userKey:String,
+    url:String
+});
+user.headPortraitModel = mongoose.model('headPortrait', headPortraitSchema);
+user.userModel = mongoose.model('user',userSchema);
+module.exports = user;

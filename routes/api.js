@@ -1,5 +1,6 @@
 var express = require('express');
-var mongodb = require('../mongodb/mongodbSercice.js');
+var user = require('../mongodb/userModel.js');
+var headPortrait = require('../mongodb/headPortraitModel.js');
 var router = express.Router();
 var formidable = require('formidable'),
   fs = require('fs'),
@@ -16,8 +17,8 @@ router.get('/', function (req, res, next) {
 // 网站首页接受 POST 请求
 router.post('/', function (req, res, next) {
   try {
-    mongodb.userModel.find(function (err, user) {
-      mongodb.headPortraitModel.find(function (err, headPortrait) {
+    user.userModel.find(function (err, user) {
+      headPortrait.headPortraitModel.find(function (err, headPortrait) {
         res.send({ formbody: JSON.stringify(req.body), userinfo: user, headPortrait: headPortrait });
       });
     });
